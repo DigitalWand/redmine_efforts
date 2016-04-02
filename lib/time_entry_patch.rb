@@ -15,14 +15,20 @@ module Activity
 
       module InstanceMethods
 
+        #Если найти соотвутствующие хуки в контроллерах, то можно выводить флеш-сообщения, генерируемые моделью, пользователям
+        def flash
+          @flash ||= nil
+        end
+
         protected
 
+        #Функция вызываемая в момент валидации модели. Именно тут проверяем все данные которые пользователь хочет запихнуть в базу
         def check_and_correct_activity
           #return true unless new_record? || changed?
           if new_record?
             a_active_type = TrackersStatusesActivities.where(tracker_id: issue.tracker_id, status_id: issue.status_id).first.activity
             if a_active_type == "<-->"
-              errors.add :base, "Задать трудозатраты для данного статуса задачи невозможно"
+              errors.add :base, "Задать трудозатраты для задачи c трекером '#{issue.tracker.name}' и статусом '#{issue.status.name}' нельзя"
             else
               self.active_type = a_active_type
               correct_hours
@@ -33,23 +39,18 @@ module Activity
           end
         end
 
+        #Вспомагательные методы модели, упрощающие доступ к кастомному полю
         def active_type
-          set_activity_type_field
+          @custom_field_active_type_id ||= CustomField.find_by_name(Setting.plugin_activity['activity_field']).id
+          @active_type ||= custom_field_values.select{|item| item.custom_field_id == @custom_field_active_type_id}.shift
         end
 
         def active_type=(value)
-          set_activity_type_field
-          @active_type.value = value
+          active_type.value = value
         end
 
         def active_type_changed?
-          set_activity_type_field
-          !(@active_type.value == @active_type.value_was)
-        end
-
-        def set_activity_type_field
-          @custom_field_active_type_id ||= CustomField.find_by_name(Setting.plugin_activity['activity_field']).id
-          @active_type ||= custom_field_values.select{|item| item.custom_field_id == @custom_field_active_type_id}.shift
+          active_type.value != active_type.value_was
         end
 
         def correct_hours
@@ -57,10 +58,6 @@ module Activity
             self.hours -= diff
             @flash = "Трудозатраты уменьшены до максимально приемлемого уровня"
           end
-        end
-
-        def flash
-          @flash ||= nil
         end
       end
     end
