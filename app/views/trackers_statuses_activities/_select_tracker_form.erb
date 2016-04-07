@@ -1,15 +1,17 @@
 <%= form_tag trackers_statuses_activities_path, method: 'get' do %>
   <%= hidden_field_tag 'id', @tracker.id %>
-  <table>
-    <tbody>
-    <tr>
-      <th>Трекер</th>
-      <td>
-        <%= select_tag "tracker",
-                       options_from_collection_for_select(Tracker.all, "id", "name", @tracker.id) %>
-      </td>
-      <td> <%= submit_tag "Выбрать" %> </td>
-    </tr>
-    </tbody>
-  </table>
+  <div class="box tabular settings">
+    <table>
+      <tbody>
+      <tr>
+        <th>Трекер</th>
+        <td>
+          <%= select_tag "tracker",
+                         options_from_collection_for_select(Tracker.all, "id", "name", @tracker.id) %>
+        </td>
+        <td> <%= submit_tag "Выбрать" %> </td>
+      </tr>
+      </tbody>
+    </table>
+  </div>
 <% end %>

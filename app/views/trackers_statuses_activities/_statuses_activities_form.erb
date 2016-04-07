@@ -1,12 +1,14 @@
 <%= form_tag mass_update_trackers_statuses_activities_path do %>
   <%= hidden_field_tag "tracker", @tracker.id %>
-  <table>
-    <% @statuses.each do |status| %>
-      <tr>
-        <td><%= status['name']%></td>
-        <td><%= select_tag("status[#{status['id']}]", options_for_select(@activities, status['activity'])) %></td>
-      </tr>
-    <% end %>
-  </table>
-  <%= submit_tag "Сохранить" %> </td>
+  <div class="box tabular settings">
+    <table>
+      <% @statuses.each do |status| %>
+        <tr>
+          <td><%= status['name']%></td>
+          <td><%= select_tag("status[#{status['id']}]", options_for_select(@activities, status['activity'])) %></td>
+        </tr>
+      <% end %>
+    </table>
+  </div>
+  <%= submit_tag "Сохранить" %>
 <% end %>

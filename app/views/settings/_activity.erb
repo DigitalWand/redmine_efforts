@@ -4,13 +4,13 @@
     <th>Поле с типом активности</th>
     <td>
       <%= select_tag("settings[activity_field]",
-                     options_from_collection_for_select(TimeEntryCustomField.all, "name", "name", settings['activity_field'])) %>
+                     options_from_collection_for_select(TimeEntryCustomField.where(field_format: 'list').all, "name", "name", settings['activity_field'])) %>
     </td>
   </tr>
   <tr>
     <th>Коэффициент лимита трудозатрат</th>
     <td>
-      <%= number_field_tag("settings[max_ratio]", value = settings['max_ratio'], min: 1, step: 0.05) %>
+      <%= number_field_tag("settings[max_ratio]", value = settings['max_ratio'], min: 1, step: 0.05, required: "required", style: "width: 50px;") %>
     </td>
   </tr>
   </tbody>

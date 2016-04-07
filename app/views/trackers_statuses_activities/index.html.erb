@@ -1,6 +1,12 @@
-<h2>Типы Активности в зависимости от трекера и статуса</h2>
-<%= render 'select_tracker_form' %>
-<br>
-<%= render 'statuses_activities_form' %>
-|
-<%= link_to 'Назад', "/settings/plugin/activity" %>
+<h2>
+  <%= title [l(:label_plugins), {:controller => 'admin', :action => 'plugins'}],
+            [@plugin.name, "/settings/plugin/#{PLUGIN_NAME}"],
+            'Типы Активности в зависимости от трекера и статуса'
+  %>
+  </h2>
+<div id="settings">
+  <%= render 'select_tracker_form' %>
+  <%= render 'statuses_activities_form' %>
+  |
+  <%= link_to 'Назад', "/settings/plugin/#{PLUGIN_NAME}" %>
+</div>
