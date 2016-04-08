@@ -10,9 +10,10 @@ class CreateTrackersStatusesActivities < ActiveRecord::Migration
     reversible do |change|
       change.up do
         cf = TimeEntryCustomField.new
-        cf.name = "Активность"
+        cf.name = "Activities"
         cf.field_format = 'list'
-        cf.possible_values = ['Активность 1']
+        cf.possible_values = ['estimate','work','test','fix']
+        cf.is_filter = 1
         cf.save!
       end
     end

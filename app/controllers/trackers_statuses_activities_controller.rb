@@ -9,7 +9,7 @@ class TrackersStatusesActivitiesController < ApplicationController
     # + для шустрой выборки и что бы не ломать голову проще условие выборки добавить к join
     @statuses = IssueStatus.connection.select_all("Select s.id, s.name, a.id as activity_id, a.activity as activity from issue_statuses as s
         left outer join trackers_statuses_activities as a on (s.id = a.status_id and a.tracker_id = #{@tracker.id}) order by position").to_hash
-    @activities = TimeEntryCustomField.find_by_name(Setting.plugin_activity['activity_field']).possible_values.unshift('<-->')
+    @activities = TimeEntryCustomField.find(Setting.plugin_activity['activity_field']).possible_values.unshift('<-->')
     @plugin = Redmine::Plugin.find(PLUGIN_NAME.to_sym)
   end
 

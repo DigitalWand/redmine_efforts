@@ -4,7 +4,7 @@
     <th>Поле с типом активности</th>
     <td>
       <%= select_tag("settings[activity_field]",
-                     options_from_collection_for_select(TimeEntryCustomField.where(field_format: 'list').all, "name", "name", settings['activity_field'])) %>
+                     options_from_collection_for_select(TimeEntryCustomField.where(field_format: 'list').all, "id", "name", settings['activity_field'])) %>
     </td>
   </tr>
   <tr>

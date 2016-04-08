@@ -41,7 +41,7 @@ module Activity
 
         #Вспомагательные методы модели, упрощающие доступ к кастомному полю
         def active_type
-          @custom_field_active_type_id ||= CustomField.find_by_name(Setting.plugin_activity['activity_field']).id
+          @custom_field_active_type_id ||= CustomField.find(Setting.plugin_activity['activity_field']).id
           @active_type ||= custom_field_values.select{|item| item.custom_field_id == @custom_field_active_type_id}.shift
         end
 
