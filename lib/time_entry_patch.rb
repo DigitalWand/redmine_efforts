@@ -26,9 +26,11 @@ module Activity
         def check_and_correct_activity
           #return true unless new_record? || changed?
           if new_record?
-            at = TrackersStatusesActivities.where(tracker_id: issue.tracker_id_was, status_id: issue.status_id_was).first.activity
+            tracker = issue.tracker_was||issue.tracker
+            status = issue.status_was||issue.status
+            at = TrackersStatusesActivities.where(tracker_id: tracker.id, status_id: status.id).first.activity
             if at == "<-->"
-              errors.add :base, "Задать трудозатраты для задачи c трекером '#{issue.tracker_was.name}' и статусом '#{issue.status_was.name}' нельзя"
+              errors.add :base, "Задать трудозатраты для задачи c трекером '#{tracker.name}' и статусом '#{status.name}' нельзя"
             else
               self.active_type = at
               correct_hours
