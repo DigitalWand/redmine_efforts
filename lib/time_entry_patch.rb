@@ -57,13 +57,11 @@ module Activity
 
         def correct_hours
           return if issue.estimated_hours.to_f == 0 # Если лимит не указан, то лимита нет
-          if (diff = (issue.total_spent_hours - (hours_was||0) + hours - issue.estimated_hours * Setting.plugin_activity['max_ratio'].to_f).round(1))>0
-            if self.hours <= diff
-              errors.add :base, "Лимит полностью исчерпан"
-            else
-              self.hours -= diff
-              @flash = "Трудозатраты уменьшены до максимально приемлемого уровня"
-            end
+          # оставшееся время = лимит времени - (потраченное время + списываемое время)
+          available_limit = issue.estimated_hours * Setting.plugin_activity['max_ratio'].to_f - (issue.total_spent_hours - (hours_was||0))
+          time_left = (available_limit - hours).round(1)
+          if (time_left) < 0
+            errors.add :base, "нельзя отметить #{hours} часов. Оставшийся лимит часов по задаче: #{available_limit}"
           end
         end
       end
