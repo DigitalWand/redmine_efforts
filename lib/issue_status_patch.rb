@@ -4,7 +4,7 @@
 require_dependency 'issue_status'
 require_dependency 'trackers_statuses_activities'
 
-module Activity
+module Efforts
   module Patches
     module IssueStatusPatch
       def self.included(base) # :nodoc:
@@ -23,6 +23,6 @@ module Activity
   end
 end
 
-unless IssueStatus.included_modules.include?(Activity::Patches::IssueStatusPatch)
-  IssueStatus.send(:include, Activity::Patches::IssueStatusPatch)
+unless IssueStatus.included_modules.include?(Efforts::Patches::IssueStatusPatch)
+  IssueStatus.send(:include, Efforts::Patches::IssueStatusPatch)
 end

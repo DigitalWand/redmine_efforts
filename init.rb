@@ -1,16 +1,14 @@
-require 'controller_issues_edit_before_save_hook'
-require 'controller_timelog_edit_before_save_hook'
-PLUGIN_NAME = 'activity'
+PLUGIN_NAME = 'efforts'
 
-Redmine::Plugin.register :activity do
+Redmine::Plugin.register :efforts do
   name 'Redmine custom logtime plugin'
   author 'DigitalWand'
   description 'This is a plugin for Redmine'
   version '0.0.2'
-  url 'https://github.com/DigitalWand/digitalwand.redmine_custom_logtime'
+  url 'https://github.com/DigitalWand/efforts'
   author_url 'http://digitalwand.ru'
 
-  settings :default => {max_ratio: 1, 'empty' => true}, :partial => 'settings/activity'
+  settings :default => {max_ratio: 1, 'empty' => true}, :partial => 'settings/efforts'
 
   ActionDispatch::Callbacks.to_prepare do
     require_dependency 'issue_status_patch'

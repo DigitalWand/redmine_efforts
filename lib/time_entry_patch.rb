@@ -2,7 +2,7 @@
 # encoding: utf-8
 require_dependency 'time_entry'
 
-module Activity
+module Efforts
   module Patches
     module TimeEntryPatch
       def self.included(base) # :nodoc:
@@ -43,7 +43,7 @@ module Activity
 
         #Вспомагательные методы модели, упрощающие доступ к кастомному полю
         def active_type
-          @custom_field_active_type_id ||= CustomField.find(Setting.plugin_activity['activity_field']).id
+          @custom_field_active_type_id ||= CustomField.find(Setting.plugin_efforts['activity_field']).id
           @active_type ||= custom_field_values.select{|item| item.custom_field_id == @custom_field_active_type_id}.shift
         end
 
@@ -58,7 +58,7 @@ module Activity
         def correct_hours
           return if issue.estimated_internal == 0 # Если лимит не указан, то лимита нет
           # оставшееся время = лимит времени - (потраченное время + списываемое время)
-          available_limit = issue.estimated_internal * Setting.plugin_activity['max_ratio'].to_f - (issue.total_spent_hours - (hours_was||0))
+          available_limit = issue.estimated_internal * Setting.plugin_efforts['max_ratio'].to_f - (issue.total_spent_hours - (hours_was||0))
           time_left = (available_limit - hours).round(1)
           if (time_left) < 0
             errors.add :base, "Нельзя отметить #{hours} часов. Оставшийся лимит часов по задаче: #{available_limit}. Обратитесь к тимлиду или менеджеру. "
@@ -69,8 +69,8 @@ module Activity
   end
 end
 
-unless TimeEntry.included_modules.include?(Activity::Patches::TimeEntryPatch)
-  TimeEntry.send(:include, Activity::Patches::TimeEntryPatch)
+unless TimeEntry.included_modules.include?(Efforts::Patches::TimeEntryPatch)
+  TimeEntry.send(:include, Efforts::Patches::TimeEntryPatch)
 end
 
 

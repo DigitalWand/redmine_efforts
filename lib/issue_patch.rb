@@ -2,7 +2,7 @@
 # encoding: utf-8
 require_dependency 'issue'
 
-module Activity
+module Efforts
   module Patches
     module IssuePatch
       def self.included(base) # :nodoc:
@@ -15,7 +15,7 @@ module Activity
 
       module InstanceMethods
         def estimated_internal
-          @custom_field_estimated_id ||= CustomField.find(Setting.plugin_activity['estimated_field']).id
+          @custom_field_estimated_id ||= CustomField.find(Setting.plugin_efforts['estimated_field']).id
           @estimated_internal ||= custom_field_values.select{|item| item.custom_field_id == @custom_field_estimated_id}.shift
           @estimated_internal.nil? ? 0.to_f : @estimated_internal.value.to_f
         end
@@ -35,8 +35,8 @@ module Activity
   end
 end
 
-unless Issue.included_modules.include?(Activity::Patches::TimeEntryPatch)
-  Issue.send(:include, Activity::Patches::IssuePatch)
+unless Issue.included_modules.include?(Efforts::Patches::TimeEntryPatch)
+  Issue.send(:include, Efforts::Patches::IssuePatch)
 end
 
 

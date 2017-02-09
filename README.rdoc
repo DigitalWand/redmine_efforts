@@ -11,11 +11,11 @@
 поля "оценка". При списании времени на задачу, проверяется значение именно этого поля.
 
 == Установка плагина
-* Скопировать в папку plugins, папка с плагином должна называться activity
+* Скопировать в папку plugins, папка с плагином должна называться efforts
 * В консоли из папки с редмайном запустить команду rake redmine:plugins:migrate RAILS_ENV=production
 
 == Удаление плагина
-* rake redmine:plugins:migrate NAME=activity VERSION=0 RAILS_ENV=production
+* rake redmine:plugins:migrate NAME=efforts VERSION=0 RAILS_ENV=production
 * удалить папку с плагином
 
 == Настройка плагина
