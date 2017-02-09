@@ -21,7 +21,7 @@ module Efforts
         end
 
         def estimated_internal=(value)
-          @estimated_internal.value = value.to_f
+          @estimated_internal.value = value.to_f if !@estimated_internal.nil?
         end
 
         protected
