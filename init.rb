@@ -1,10 +1,10 @@
 PLUGIN_NAME = 'efforts'
 
 Redmine::Plugin.register :efforts do
-  name 'Redmine custom logtime plugin'
+  name 'Redmine efforts control plugin'
   author 'DigitalWand'
-  description 'This is a plugin for Redmine'
-  version '0.0.2'
+  description 'This plugin automatically sets activity type of an time entity by issue status. Also it prevents to spent more time, then estimated for issue.'
+  version '0.1'
   url 'https://github.com/DigitalWand/efforts'
   author_url 'http://digitalwand.ru'
 
