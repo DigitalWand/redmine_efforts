@@ -8,6 +8,13 @@
     </td>
   </tr>
   <tr>
+    <th>Поле с оценкой для клиента</th>
+    <td>
+      <%= select_tag("settings[estimated_field]",
+                     options_from_collection_for_select(IssueCustomField.where(field_format: 'float').all, "id", "name", settings['estimated_field'])) %>
+    </td>
+  </tr>
+  <tr>
     <th>Коэффициент лимита трудозатрат</th>
     <td>
       <%= number_field_tag("settings[max_ratio]", value = settings['max_ratio'], min: 1, step: 0.05, required: "required", style: "width: 50px;") %>

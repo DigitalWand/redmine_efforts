@@ -15,6 +15,7 @@ Redmine::Plugin.register :activity do
   ActionDispatch::Callbacks.to_prepare do
     require_dependency 'issue_status_patch'
     require_dependency 'time_entry_patch'
+    require_dependency 'issue_patch'
   end
 
   #call_hook(:controller_issues_edit_before_save, { :params => params, :issue => @issue, :time_entry => time_entry, :journal => @issue.current_journal})
