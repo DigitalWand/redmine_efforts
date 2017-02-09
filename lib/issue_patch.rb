@@ -17,7 +17,7 @@ module Activity
         def estimated_internal
           @custom_field_estimated_id ||= CustomField.find(Setting.plugin_activity['estimated_field']).id
           @estimated_internal ||= custom_field_values.select{|item| item.custom_field_id == @custom_field_estimated_id}.shift
-          @estimated_internal.value
+          @estimated_internal.nil? ? 0 : @estimated_internal.value
         end
       end
     end
