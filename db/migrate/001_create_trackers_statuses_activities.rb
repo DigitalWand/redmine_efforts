@@ -17,5 +17,7 @@ class CreateTrackersStatusesActivities < ActiveRecord::Migration
         cf.save!
       end
     end
+  rescue => e
+    puts "ERROR: #{e}"
   end
 end

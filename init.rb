@@ -11,7 +11,7 @@ Redmine::Plugin.register :efforts do
   settings :default => {max_ratio: 1, 'empty' => true}, :partial => 'settings/efforts'
 
   ActionDispatch::Callbacks.to_prepare do
-    require_dependency 'issue_status_patch'
+    require_dependency 'efforts_issue_status_patch'
     require_dependency 'time_entry_patch'
     require_dependency 'issue_patch'
   end
