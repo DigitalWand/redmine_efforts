@@ -28,6 +28,11 @@ module Efforts
 
         def set_estimated_internal
           self.estimated_internal = self.estimated_hours if self.estimated_internal.to_int == 0
+          unless self.estimated_hours.nil?
+            if self.estimated_hours <= 0.0
+              errors.add :base, "Оценка времени не может быть равна '#{self.estimated_hours}'!"
+            end
+          end
         end
 
       end
