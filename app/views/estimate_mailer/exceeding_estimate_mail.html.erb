@@ -1,0 +1,34 @@
+<p>Трудозатраты по <a href='https://redmine.digitalwand.ru/issues/<%= @issue.id %>'>Задаче #<%= @issue.id%>: <%= @issue.subject %></a> превысили оценку</p>
+<br>
+<br>
+<p>Последние 5 записей трудозатрат:</p>
+<style>
+  td {
+    border: 1px solid #ddd;
+    padding: 0 5px;
+  }
+  table tbody tr:last-child {
+    color: red;
+    font-weight: bold;
+  }
+</style>
+<table>
+  <thead>
+    <tr>
+      <td>Автор</td>
+      <td>Дата</td>
+      <td>Часов списано</td>
+      <td>Комментарий</td>
+    </tr>
+  </thead>
+  <tbody>
+    <% @issue.time_entries.order(:updated_on).last(5).each do |time_entry| %>
+      <tr style='.last:last-child{color: red}'>
+        <td><%= time_entry.user.name %></td>
+        <td><%= time_entry.updated_on.strftime('%d-%m-%Y %H:%M') %></td>
+        <td><%= time_entry.hours.to_s %> ч.</td>
+        <td><%= time_entry.comments %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>

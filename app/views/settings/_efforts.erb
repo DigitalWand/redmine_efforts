@@ -1,25 +1,41 @@
 <table>
   <tbody>
-  <tr>
-    <th>Поле с типом активности</th>
-    <td>
-      <%= select_tag("settings[activity_field]",
-                     options_from_collection_for_select(TimeEntryCustomField.where(field_format: 'list').all, "id", "name", settings['activity_field'])) %>
+    <tr>
+      <th>Поле с типом активности</th>
+      <td>
+          <%= select_tag("settings[activity_field]",
+                         options_from_collection_for_select(TimeEntryCustomField.where(field_format: 'list').all, "id", "name", settings['activity_field'])) %>
+      </td>
+      </tr>
+    <tr>
+      <th>Поле с оценкой для клиента</th>
+      <td>
+        <%= select_tag("settings[estimated_field]",
+            options_from_collection_for_select(IssueCustomField.where(field_format: 'float').all, "id", "name", settings['estimated_field'])) %>
+      </td>
+    </tr>
+    <tr>
+      <th>Коэффициент лимита трудозатрат</th>
+      <td>
+        <%= number_field_tag("settings[max_ratio]", settings['max_ratio'], min: 1, step: 0.05, required: "required", style: "width: 50px;") %>
+      </td>
+    </tr>
+    <tr>
+      <th>Для каких ролей присылаем уведомления</th>
+      <td>
+        <%= select_tag("settings[roles]", options_from_collection_for_select(Role.all, :id, :name, settings['roles']), { multiple: true, style: 'width: 100%; height: 200px;' }) %>
+        <em class="info" style='color: red;'>Если роли не указаны, рассылка писем о превышении не приходит</em>
+        <em class="info">по умолчанию: Менеджер и Тимлид</em>
     </td>
-  </tr>
-  <tr>
-    <th>Поле с оценкой для клиента</th>
-    <td>
-      <%= select_tag("settings[estimated_field]",
-                     options_from_collection_for_select(IssueCustomField.where(field_format: 'float').all, "id", "name", settings['estimated_field'])) %>
-    </td>
-  </tr>
-  <tr>
-    <th>Коэффициент лимита трудозатрат</th>
-    <td>
-      <%= number_field_tag("settings[max_ratio]", value = settings['max_ratio'], min: 1, step: 0.05, required: "required", style: "width: 50px;") %>
-    </td>
-  </tr>
+    </tr>
+    <tr>
+      <th>Допуск, по которому можно превышать (+X) или не допускать превышения (-X)</th>
+      <td valign="top">
+        <%= number_field_tag("settings[limit]", settings['limit'], step: 0.05, style: "width: 50px;") %>
+        <em class="info">по умолчанию: 0</em>
+      </td>
+    </tr>
+
   </tbody>
 </table>
 
