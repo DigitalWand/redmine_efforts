@@ -11,7 +11,7 @@ module Efforts
           unloadable # Send unloadable so it will not be unloaded in development
           validate :set_estimated_internal
           before_save :message_status_check
-          before_save :update_estimated_internal
+          before_save :update_estimated
         end
       end
 
@@ -24,6 +24,30 @@ module Efforts
 
         def estimated_internal=(value)
           @estimated_internal.value = value.to_f if !@estimated_internal.nil?
+        end
+
+        # Возвращает оценку тестирования
+        def estimated_testing
+          @custom_field_estimated_testing_id ||= CustomField.find_by_id(Setting[SETTINGS_NAME][RATIO_TEST_ID]).try(:id)
+          @estimated_testing ||= custom_field_values.select{|item| item.custom_field_id == @custom_field_estimated_testing_id}.shift
+          @estimated_testing.try(:value).to_f
+        end
+
+        # Устанавливает оценку тестирования
+        def estimated_testing=(value)
+          @estimated_testing.value = value.to_f if !@estimated_testing.nil?
+        end
+
+        # Возвращает оценку руководства
+        def estimated_control
+          @custom_field_estimated_control_id ||= CustomField.find_by_id(Setting[SETTINGS_NAME][RATIO_CONTROL_ID]).try(:id)
+          @estimated_control ||= custom_field_values.select{|item| item.custom_field_id == @custom_field_estimated_control_id}.shift
+          @estimated_control.try(:value).to_f
+        end
+
+        # Устанавливает оценку руководства
+        def estimated_control=(value)
+          @estimated_control.value = value.to_f if !@estimated_control.nil?
         end
 
         protected
@@ -42,10 +66,31 @@ module Efforts
           end
         end
 
-        # Обновляет внутренние трудозатраты если в статусе новая и трудозатраты не одинаковые
-        def update_estimated_internal
-          if self.persisted? and self.status_id == 1 and self.estimated_internal != self.estimated_hours
-            self.update({estimated_internal: self.estimated_hours})
+        # Обновляет оценку трудозатрат
+        def update_estimated
+          update_data = {}
+
+          if self.persisted? and self.status_id == 1
+            # Обновляем оценку трудозатрат, если не одинаковые
+            if self.estimated_internal != self.estimated_hours
+              update_data.merge!({estimated_internal: self.estimated_hours})
+            end
+
+            # Обновляем оценку трудозатрат для тестирования, если еще в статусе новая (и трудозатраты не пересчитаны)
+            estimated_testing = self.estimated_hours * Setting[SETTINGS_NAME][RATIO_TEST].to_f
+            if self.estimated_testing != estimated_testing
+              update_data.merge!({estimated_testing: estimated_testing})
+            end
+
+            # Обновляем оценку трудозатрат для руководства, если еще в статусе новая (и трудозатраты не пересчитаны)
+            estimated_control = self.estimated_hours * Setting[SETTINGS_NAME][RATIO_CONTROL].to_f
+            if self.estimated_control != estimated_control
+              update_data.merge!({estimated_control: estimated_control})
+            end
+          end
+
+          if update_data.present?
+            self.update(update_data)
           end
         end
 

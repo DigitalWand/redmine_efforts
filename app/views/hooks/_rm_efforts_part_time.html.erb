@@ -1,0 +1,4 @@
+<%= issue_fields_rows do |rows|
+  rows.left '', '', :style => 'color: transparent'
+  rows.right l(:field_estimate_time_in_part), estimate_time_in_part(@issue), :class => 'estimated-hours'
+end%>

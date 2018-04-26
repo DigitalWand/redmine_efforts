@@ -11,6 +11,8 @@ module Efforts
           unloadable # Send unloadable so it will not be unloaded in development
           validate :check_and_correct_activity
           after_save :is_exceeding_estimate
+
+          has_one :type_costs, class_name: 'IssueCustomField', primary_key: 'custom_field_id', foreign_key: 'id'
         end
       end
 
@@ -23,6 +25,39 @@ module Efforts
 
         protected
 
+        # Получим "свои" роли на проекте
+        def my_roles
+          @my_roles ||= self.project.users_by_role.map do |role, users|
+            if users.map(&:id).include?(self.user.id).present?
+              role
+            end
+          end.compact
+        end
+
+        # Записывает трудозатраты руководства и тестирования
+        def select_active_type(default)
+          # self.type_costs # что за затрата
+          # self.project.users_by_role # все роли с юзерами на проекте
+          # self.user # Кто оставил запись
+
+          if my_roles.count == 1 # Одна роль на проекте
+            # activities = TrackersStatusesActivities.where(tracker_id: tracker.id).where('activity <> "" AND activity <> "<-->"').map(&:activity).uniq
+            # TODO: Завести таблицу по связке роли и активности!!! + приоритет ролей
+            # ["Non member", "Anonymous", "Менеджер", "Разработчик", "Администратор", "Клиент", "Тестировщик", "Тимлид", "Дизайнер", "Редактор"]
+            # ["работа по задаче", "тестирование", "консультации", "правка багов"]
+            if my_roles.first.name == "Тимлид"
+              return TrackersStatusesActivities.where(activity: 'руководство').uniq.first.activity
+            elsif my_roles.first.name == "Тестировщик"
+              return TrackersStatusesActivities.where(activity: 'тестирование').uniq.first.activity
+            else
+              return default
+            end
+          elsif my_roles.count > 1 # пока не знаем что делать, оставляем как есть
+            return default
+          end
+
+        end
+
         def is_exceeding_estimate
           return if issue.new_record? or issue.message_of_exceeding_estimate # Не отправлять если новое или уже отправлено
           settings = Setting[SETTINGS_NAME] || {}
@@ -30,7 +65,6 @@ module Efforts
           # если текущая оценка + лимит превышает запланированную, то
           if (issue.time_entries.map(&:hours).sum + limit) > issue.estimated_internal
               role_ids = (settings['roles'] || []).map(&:to_i)
-              # puts "!!! estimate: им: #{role_ids}"
               recipients = project. # Все те кому отправить письмо счастья
                            members.
                            joins(:roles).
@@ -38,7 +72,6 @@ module Efforts
                            includes(:user).
                            uniq.
                            map(&:user)
-              # puts "!!! список имен: #{recipients.map(&:name)}"
 
               recipients.each do |recipient|
                 EstimateMailer.exceeding_estimate_mail(recipient, issue).deliver
@@ -47,9 +80,8 @@ module Efforts
           end
         end
 
-        #Функция вызываемая в момент валидации модели. Именно тут проверяем все данные которые пользователь хочет запихнуть в базу
+        # Функция вызываемая в момент валидации модели. Именно тут проверяем все данные которые пользователь хочет запихнуть в базу
         def check_and_correct_activity
-          #return true unless new_record? || changed?
           if new_record?
             tracker = Tracker.find issue.tracker_id_was
             status = IssueStatus.find issue.status_id_was
@@ -57,7 +89,7 @@ module Efforts
             if at == "<-->"
               errors.add :base, "Задать трудозатраты для задачи c трекером '#{tracker.name}' и статусом '#{status.name}' нельзя"
             else
-              self.active_type = at
+              self.active_type = self.active_type.to_s.blank? ? select_active_type(at) : at
               correct_hours
             end
           else
@@ -66,7 +98,7 @@ module Efforts
           end
         end
 
-        #Вспомагательные методы модели, упрощающие доступ к кастомному полю
+        # Вспомагательные методы модели, упрощающие доступ к кастомному полю
         def active_type
           @custom_field_active_type_id ||= CustomField.find(Setting[SETTINGS_NAME]['activity_field']).id
           @active_type ||= custom_field_values.select{|item| item.custom_field_id == @custom_field_active_type_id}.shift
@@ -82,11 +114,30 @@ module Efforts
 
         def correct_hours
           return if issue.estimated_internal == 0 # Если лимит не указан, то лимита нет
-          # оставшееся время = лимит времени - (потраченное время + списываемое время)
-          available_limit = issue.estimated_internal * Setting[SETTINGS_NAME]['max_ratio'].to_f - (issue.total_spent_hours - (hours_was||0))
-          time_left = (available_limit - hours).round(1)
+          max_ratio = Setting[SETTINGS_NAME]['max_ratio'].to_f
+
+          available_limit = if my_roles.count == 1 # Одна роль на проекте
+            if (my_roles.first.name == "Тимлид") and (self.active_type.to_s == 'руководство') #TODO: ВНИМАНИЕ ПЕРПИСАТЬ НА СВЯЗИ!!
+              ratio_control = Setting[SETTINGS_NAME][RATIO_CONTROL].to_f
+              # оставшееся время = лимит времени на руководство * коэффициент - (потраченное время * коф руководства)
+              issue.estimated_control * max_ratio  - (issue.total_spent_hours - (hours_was||0)) * ratio_control
+            elsif (my_roles.first.name == "Тестировщик") and (self.active_type.to_s == 'тестирование') #TODO: ВНИМАНИЕ ПЕРПИСАТЬ НА СВЯЗИ!!
+              ratio_test =  Setting[SETTINGS_NAME][RATIO_TEST].to_f
+              # оставшееся время = лимит времени на тустировщика * коэффициент - (потраченное время * коф тестирования)
+              issue.estimated_testing * max_ratio - (issue.total_spent_hours - (hours_was||0)) * ratio_test
+            else
+              issue.estimated_internal * max_ratio - (issue.total_spent_hours - (hours_was||0))
+            end
+          else my_roles.count > 1 # пока не знаем что делать, оставляем как есть....
+            issue.estimated_internal * max_ratio - (issue.total_spent_hours - (hours_was||0))
+          end
+
+          time_left = (available_limit - hours).round(2)
           if (time_left) < 0
-            errors.add :base, "Нельзя отметить #{hours} часов. Оставшийся лимит часов по задаче: #{available_limit}. Обратитесь к тимлиду или менеджеру. "
+            errors.add :base, l('can_not_be_noted', {
+                hours: hours.round(2),
+                limit: available_limit.round(2)
+            })
           end
         end
       end

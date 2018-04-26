@@ -1,5 +1,9 @@
 PLUGIN_NAME = 'efforts'
 SETTINGS_NAME = "plugin_#{PLUGIN_NAME}".to_sym
+RATIO_TEST = 'max_ratio_test'
+RATIO_TEST_ID = 'ratio_test_id'
+RATIO_CONTROL = 'max_ratio_control'
+RATIO_CONTROL_ID = 'ratio_control_id1'
 
 Redmine::Plugin.register PLUGIN_NAME.to_sym do
   name 'Redmine efforts control plugin'
@@ -14,14 +18,19 @@ Redmine::Plugin.register PLUGIN_NAME.to_sym do
       'empty' => true,
       roles: [3, 9],   # Для каких ролей присылаем уведомления 3-менеджер, 9-тимлид
       limit: 0,        # Допуск, по которому можно превышать(+) или не допускать превышения(-)
+      RATIO_TEST => 0.2,
+      RATIO_TEST_ID => IssueCustomField.find_by_name('Оценка тестирования').try(:id),
+      RATIO_CONTROL => 0.1,
+      RATIO_CONTROL_ID => IssueCustomField.find_by_name('Оценка руководства').try(:id),
   }
 
   ActionDispatch::Callbacks.to_prepare do
     require_dependency 'efforts_issue_status_patch'
     require_dependency 'time_entry_patch'
     require_dependency 'issue_patch'
+    require_dependency 'view_hooks'
   end
 
-  #call_hook(:controller_issues_edit_before_save, { :params => params, :issue => @issue, :time_entry => time_entry, :journal => @issue.current_journal})
-  #call_hook(:controller_timelog_edit_before_save, { :params => params, :time_entry => @time_entry })
+  require File.dirname(__FILE__) + '/app/helpers/efforts_helper'
+  ActionView::Base.send :include, EffortsHelper
 end
